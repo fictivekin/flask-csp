@@ -1,0 +1,40 @@
+<html>
+    <head>
+        <title>CSP Report Review</title>
+        <style type="text/css">
+            .odd {
+                background-color: #ffffff;
+            }
+
+            .even {
+                background-color: #cfcfcf;
+            }
+        </style>
+    </head>
+    <body>
+        <table>
+            <thead>
+                <tr>
+                    <th>Disposition</th>
+                    <th>Document URI</th>
+                    <th>Blocked URI</th>
+                    <th>Violated Directive</th>
+                    <th>Original Policy</th>
+                    <th>Referrer</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports: %}
+                    <tr class="{{ loop.cycle('odd', 'even') }}">
+                        <td>{{ report.disposition }}</td>
+                        <td>{{ report.document_uri }}</td>
+                        <td>{{ report.blocked_uri }}</td>
+                        <td>{{ report.violated_directive }}</td>
+                        <td>{{ report.original_policy }}</td>
+                        <td>{{ report.referrer }}</td>
+                    </tr>
+                {% endfor %}
+            <tbody>
+        </table>
+    </body>
+</html>
