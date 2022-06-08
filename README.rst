@@ -10,12 +10,12 @@ There are 3 ways to use this extension:
 - mixed, using both the extension and a decorator to override specific views
 
 
-Quick Start
------------
+Installation
+------------
 
 .. code:: bash
 
-    $ pip3 install flask-csp
+    $ pip3 install git+https://github.com/fictivekin/flask-csp.git#egg=flask_csp
 
 
 App-level extension
