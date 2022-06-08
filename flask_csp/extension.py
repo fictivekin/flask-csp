@@ -82,10 +82,10 @@ class CSP:
                 raise ValueError(
                     'Cannot load SqlAlchemy CSP views. SqlAlchemy is not available')
 
-            app.add_blueprint(sqlalchemy_bp, prefix=self._receiver_prefix)
+            app.register_blueprint(sqlalchemy_bp, prefix=self._receiver_prefix)
 
         else:
-            app.add_blueprint(simple_bp, prefix=self._receiver_prefix)
+            app.register_blueprint(simple_bp, prefix=self._receiver_prefix)
 
     def after_request(self, resp):
         """The after request handler for the extension"""

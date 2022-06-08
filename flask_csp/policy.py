@@ -14,7 +14,8 @@ from .constants import Directive, FetchRestriction, SandboxRestriction, TrustedT
 def is_allowed_enum_value(type_, item, allowed=None):
     if not isinstance(item, type_):
         try:
-            item = type_[str(item).upper().replace('-','_')]
+            maybe_key = str(item).upper().replace('-','_').replace("'",'').replace(':','')
+            item = type_[maybe_key]
         except KeyError as exc:
             raise ValueError(f'Not a valid {type_.__name__}: {item}') from exc
 
@@ -186,7 +187,7 @@ def load_directive(string, *restrictions):
     if isinstance(string, BaseDirective):
         return string
 
-    directive = is_allowed_directive(string.lower())
+    directive = is_allowed_directive(string)
 
     if directive in SourceDirective._allowed:  # pylint: disable=protected-access
         return SourceDirective(directive, *restrictions)
@@ -226,10 +227,22 @@ class ReportGroup:
 
     def __init__(self, name, endpoints, max_age=None):
         self.name = name
-        self.endpoints = endpoints
+        self.endpoints = []
+        self.add_endpoint(endpoints)
 
         if max_age is not None and int(max_age) > 0:
             self.max_age = max_age
+
+    def add_endpoint(self, endpoint):
+        if not endpoint:
+            return
+
+        if isinstance(endpoint, (list, set, tuple,)):
+            for item in endpoint:
+                self.add_endpoint(item)
+
+        else:
+            self.endpoints.append(endpoint)
 
     def __str__(self):
         value = {
@@ -237,7 +250,7 @@ class ReportGroup:
             "max_age": self.max_age,
             "endpoints": [{"url": endpoint} for endpoint in self.endpoints],
         }
-        return json.dumps(value)
+        return json.dumps(value, sort_keys=True)
 
 
 class ReportTo(Header):
@@ -245,21 +258,18 @@ class ReportTo(Header):
     key = 'Report-To'
     groups = []
 
-    def __init__(self, *, groups=None):
-        if groups is not None:
-            if not isinstance(groups, (list, set, tuple, )):
-                groups = [groups]
-
-            self.groups = groups
-
-        else:
-            self.groups = []
+    def __init__(self, *groups):
+        self.groups = []
+        self.add(groups)
 
     @property
     def value(self):
-        return ','.join(self.groups)
+        return ','.join([str(group) for group in self.groups])
 
     def add(self, group):
+        if not group:
+            return
+
         if isinstance(group, (list, set, tuple,)):
             for item in group:
                 self.add(item)
@@ -275,15 +285,9 @@ class ContentSecurityPolicy(Header):
     key = 'Content-Security-Policy'
     directives = []
 
-    def __init__(self, *, directives=None):
-        if directives is not None:
-            if not isinstance(directives, (list, set, tuple,)):
-                directives = [directives]
-
-            self.directives = directives
-
-        else:
-            self.directives = []
+    def __init__(self, *directives):
+        self.directives = []
+        self.add(directives)
 
     @property
     def value(self):
@@ -306,7 +310,12 @@ class ReportOnlyPolicy(ContentSecurityPolicy):
 
     @property
     def value(self):
-        if not filter(lambda item: item.directive == Directive.REPORT_TO, self.directives):
+        report_to_exists = [
+            item for item in self.directives
+            if item.directive in (Directive.REPORT_TO, Directive.REPORT_URI)
+        ]
+
+        if not report_to_exists:
             raise ValueError('There must be a report-to directive when using a report-only policy!')
 
         return super().value

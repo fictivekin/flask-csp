@@ -40,9 +40,10 @@ def set_csp_header(resp, options):
            and not isinstance(resp.headers, MultiDict)):
         resp.headers = MultiDict(resp.headers)
 
+    non_directive_options = ['report_only',]
     header = (ReportOnlyPolicy if options.get('report_only', False) else ContentSecurityPolicy)()
     for option, restrictions in options.items():
-        if not restrictions:
+        if option in non_directive_options or not restrictions:
             continue
         if not isinstance(restrictions, (list, set, tuple, )):
             restrictions = [restrictions]
