@@ -9,7 +9,7 @@ def readme():
 
 name = 'flask-csp'
 description = 'A Flask extension/decorator to easily add Content-Security-Policy (CSP) headers'
-version = '0.1'
+version = '1.0.0'
 author = 'Fictive Kin LLC'
 email = 'hello@fictivekin.com'
 classifiers = [
