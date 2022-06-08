@@ -4,6 +4,8 @@ flask_csp.extension
 
 import logging
 
+from flask import Flask, Blueprint
+
 from .core import get_csp_options, set_csp_header
 
 from .simple.views import CSP_BP as simple_bp
@@ -38,7 +40,10 @@ class CSP:
     def __init__(self, app=None, *, receiver_prefix=None, sqlalchemy=None, **kwargs):
         """CSP initializer"""
 
-        self._options = kwargs
+        self._options = {}
+        if kwargs:
+            self._options = kwargs
+
         self._receiver_prefix = receiver_prefix
         self._sqlalchemy = sqlalchemy
 
@@ -48,16 +53,15 @@ class CSP:
     def init_app(self, app, *, receiver_prefix=None, sqlalchemy=None, **kwargs):
         """App initialization for the extension"""
 
-        # The resources and options may be specified in the App Config, the CSP constructor
-        # or the kwargs to the call to init_app.
-        self._options = get_csp_options(app, self._options, kwargs)
+        if not isinstance(app, Flask):
+            raise ValueError('Provided value was not a Flask app instance')
+
+        self.setup_after_request(app, **kwargs)
 
         if receiver_prefix is not None:
             self._receiver_prefix = receiver_prefix
         if sqlalchemy is not None:
             self._sqlalchemy = sqlalchemy
-
-        app.after_request(self.after_request)
 
         # These error handlers will still respect the behavior of the route
         if self._options.get('intercept_exceptions', True):
@@ -87,7 +91,24 @@ class CSP:
         else:
             app.register_blueprint(simple_bp, prefix=self._receiver_prefix)
 
+    def init_blueprint(self, blueprint, **kwargs):
+        """Blueprint initialization for the extension"""
+
+        if not isinstance(blueprint, Blueprint):
+            raise ValueError('Provided value was not a Blueprint instance')
+
+        self.setup_after_request(blueprint, **kwargs)
+
+    def setup_after_request(self, app_or_bp, **kwargs):
+        """Adds the CSP header handler to the after request flow"""
+
+        # The resources and options may be specified in the App Config, the CSP constructor
+        # or the kwargs to the call to init_app/init_blueprint.
+        self._options = get_csp_options(app_or_bp, self._options, kwargs)
+
+        app_or_bp.after_request(self.after_request)
+
     def after_request(self, resp):
-        """The after request handler for the extension"""
+        """After request handler that adds the CSP header"""
 
         return set_csp_header(resp, self._options)
