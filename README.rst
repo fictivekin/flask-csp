@@ -3,11 +3,16 @@ Flask-CSP
 
 A Flask extension for including Content-Security-Policy (CSP) headers in responses that Flask builds.
 
-There are 3 ways to use this extension:
+There are 4 ways to use this extension:
 
-- globally, covering the entire app with a single policy
-- individual views, using a decorator that can have specific policies for each view
-- mixed, using both the extension and a decorator to override specific views
+- global: covering the entire app with a single policy
+- blueprint: covering a specific blueprint with a single policy
+- individual views: using a decorator that can have a specific policy for each view
+- mixed: using any combination of the global, blueprint and decorator to override specific views
+
+*Note:* When mixing the methods, the decorator takes precedence and will override blueprint or
+ global settings. The blueprint will override global settings. And the global settings will cover
+ anything that hasn't been already handled via blueprints or decorators.
 
 
 Installation
@@ -18,8 +23,8 @@ Installation
     $ pip3 install git+https://github.com/fictivekin/flask-csp.git#egg=flask_csp
 
 
-App-level extension
--------------------
+Global App-level extension
+--------------------------
 
 .. code:: python
 
@@ -32,6 +37,35 @@ App-level extension
     @app.route("/")
     def index():
       return "Hello, with a very simple default CSP policy!"
+
+
+Blueprint-level extension
+--------------------------
+
+.. code:: python
+
+    from flask import Flask, Blueprint
+    from flask_csp import CSP
+
+    app = Flask(__name__)
+    csp = CSP()
+
+    bp = Blueprint('csp_covered', __name__)
+    csp.init_blueprint(
+        bp,
+        default_src=['data:', 'https:', 'self'],
+        upgrade_insecure_requests=True
+    )
+
+    @bp.route("/")
+    def blueprint_index():
+        return "Hello, with a non-default CSP policy!"
+
+    @app.route("/")
+    def index():
+        return "Hello, with no CSP policy set!"
+
+    app.register_blueprint(bp, prefix='/my-blueprint')
 
 
 As a decorator
@@ -47,7 +81,7 @@ As a decorator
     @app.route("/")
     @csp
     def index():
-      return "Hello, with a very simple default CSP policy!"
+        return "Hello, with a very simple default CSP policy!"
 
     @app.route("/report-only")
     @csp(report_only=True, report_uri="https://example.com/csp/receiver")
@@ -68,7 +102,7 @@ Mixed use of extension and decorator
 
     @app.route("/")
     def index():
-      return "Hello, with a very simple default CSP policy set by the extension!"
+        return "Hello, with a very simple default CSP policy set by the extension!"
 
     @app.route("/report-only")
     @csp(report_only=True, report_uri="https://example.com/csp/receiver")
