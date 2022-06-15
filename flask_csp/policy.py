@@ -112,6 +112,9 @@ class SimpleDirective(BaseDirective):
         if not restriction:
             raise ValueError('Cannot add an empty restriction to a directive')
 
+        if isinstance(restriction, Enum):
+            raise ValueError('You can only add string value restrictions to a SimpleDirective')
+
         if self.restrictions:
             raise ValueError('You cannot add multiple restrictions to a SimpleDirective.')
 
@@ -179,6 +182,16 @@ class SourceDirective(BaseDirective):
             SimpleDirective._allowed +
             EmptyDirective._allowed
     ]
+
+    def add(self, restriction):
+        if not restriction:
+            raise ValueError('Cannot add an empty restriction to a directive')
+
+        try:
+            super().add(is_allowed_fetch_restriction(restriction))
+
+        except ValueError:
+            super().add(str(restriction))
 
 
 def load_directive(string, *restrictions):

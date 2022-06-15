@@ -94,7 +94,7 @@ def get_app_kwarg_dict(app=None):
     app_config = getattr(app, 'config', {})
 
     return {
-        k.name.lower(): app_config.get(f'CSP_{k.name}')
+        k.name.lower(): app_config.get(f'CSP_{k.name.upper()}')
         for k in Directive
-        if app_config.get(f'CSP_{k.name}') is not None
+        if app_config.get(f'CSP_{k.name.upper()}') is not None
     }
