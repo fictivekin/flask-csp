@@ -9,11 +9,11 @@ def readme():
 
 name = 'flask-csp'
 description = 'A Flask extension/decorator to easily add Content-Security-Policy (CSP) headers'
-version = '1.0.0'
+version = '1.0.1'
 author = 'Fictive Kin LLC'
 email = 'hello@fictivekin.com'
 classifiers = [
-    'Development Status :: 3 - Alpha',
+    'Development Status :: 4 - Beta',
     'Environment :: Web Environment',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: MIT License',
@@ -22,6 +22,7 @@ classifiers = [
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
     'Operating System :: OS Independent',
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     'Topic :: Software Development',
