@@ -42,9 +42,7 @@ if __name__ == "__main__":
         maintainer_email=email,
         license='MIT',
         python_requires=">=3.6",
-        packages=[
-            'flask_csp',
-        ],
+        packages=setuptools.find_packages(),
         install_requires=[
             'Flask',
         ],
