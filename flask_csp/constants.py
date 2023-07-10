@@ -59,12 +59,13 @@ class FetchRestriction(Enum):
     SELF = "'self'"
     UNSAFE_INLINE = "'unsafe-inline'"
     UNSAFE_EVAL = "'unsafe-eval'"
-
-    # The following are experimental values. Use at your own discretion.
     UNSAFE_HASHES = "'unsafe-hashes'"
     UNSAFE_ALLOW_REDIRECTS = "'unsafe-allow-redirects'"
     STRICT_DYNAMIC = "'strict-dynamic'"
     REPORT_SAMPLE = "'report-sample'"
+
+    # The following are experimental values. Use at your own discretion.
+    WASM_UNSAFE_EVAL = "'wasm-unsafe-eval'"
 
     # These values restrict by scheme and should _not_ be single quoted,
     # however, they _must_ end with a `:`
